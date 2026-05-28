@@ -5,16 +5,19 @@ import { prisma } from '@/lib/prisma'
 import { AppRuntime } from './runtime'
 import { AppConfig } from '@/lib/config-schema'
 
+export const dynamic = 'force-dynamic'
+
 export default async function AppPage({
   params,
 }: {
-  params: { appId: string }
+  params: Promise<{ appId: string }>
 }) {
+  const { appId } = await params
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) redirect('/login')
 
   const app = await prisma.app.findFirst({
-    where: { id: params.appId, userId: session.user.id },
+    where: { id: appId, userId: session.user.id },
     include: { collections: true },
   })
 

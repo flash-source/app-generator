@@ -17,12 +17,12 @@ async function getAppAndCollection(
 
   const config = app.config as AppConfig
   const collectionConfig = config.collections.find(
-    (c: AppConfig['collections'][number]) => c.name.toLowerCase() === collectionName.toLowerCase()
+    (c) => c.name.toLowerCase() === collectionName.toLowerCase()
   )
   if (!collectionConfig) return { error: 'Collection not found', status: 404 }
 
   const collection = app.collections.find(
-    (c: (typeof app.collections)[number]) => c.name.toLowerCase() === collectionName.toLowerCase()
+    (c) => c.name.toLowerCase() === collectionName.toLowerCase()
   )
   if (!collection) return { error: 'Collection not found', status: 404 }
 
@@ -31,12 +31,13 @@ async function getAppAndCollection(
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { appId: string; collection: string } }
+  { params }: { params: Promise<{ appId: string; collection: string }> }
 ) {
+  const { appId, collection } = await params
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const result = await getAppAndCollection(params.appId, params.collection, session.user.id)
+  const result = await getAppAndCollection(appId, collection, session.user.id)
   if ('error' in result) return NextResponse.json({ error: result.error }, { status: result.status })
 
   const { searchParams } = new URL(req.url)
@@ -58,12 +59,13 @@ export async function GET(
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { appId: string; collection: string } }
+  { params }: { params: Promise<{ appId: string; collection: string }> }
 ) {
+  const { appId, collection } = await params
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const result = await getAppAndCollection(params.appId, params.collection, session.user.id)
+  const result = await getAppAndCollection(appId, collection, session.user.id)
   if ('error' in result) return NextResponse.json({ error: result.error }, { status: result.status })
 
   const body = await req.json().catch(() => null)
@@ -75,24 +77,26 @@ export async function POST(
   const record = await prisma.record.create({
     data: { collectionId: result.collection.id, data: body },
   })
-
   return NextResponse.json(record, { status: 201 })
 }
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { appId: string; collection: string } }
+  { params }: { params: Promise<{ appId: string; collection: string }> }
 ) {
+  const { appId, collection } = await params
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const result = await getAppAndCollection(params.appId, params.collection, session.user.id)
+  const result = await getAppAndCollection(appId, collection, session.user.id)
   if ('error' in result) return NextResponse.json({ error: result.error }, { status: result.status })
 
   const { searchParams } = new URL(req.url)
   const id = searchParams.get('id')
   if (!id) return NextResponse.json({ error: 'Record ID required' }, { status: 400 })
 
-  await prisma.record.delete({ where: { id } })
+  await prisma.record.deleteMany({
+    where: { id, collectionId: result.collection.id },
+  })
   return NextResponse.json({ success: true })
 }
