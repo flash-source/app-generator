@@ -107,6 +107,16 @@ export default function LoginPage() {
           >
             {loading ? 'Please wait...' : isRegister ? 'Create account' : 'Sign in'}
           </button>
+
+          <div className="text-right">
+            <button
+              type="button"
+              onClick={() => router.push('/forgot-password')}
+              className="text-zinc-500 hover:text-zinc-300 text-xs transition-colors"
+            >
+              Forgot password?
+            </button>
+          </div>
         </form>
 
         <p className="text-center text-zinc-500 text-xs mt-4">
