@@ -1,0 +1,75 @@
+import { z } from 'zod'
+
+export const FieldSchema = z.object({
+  name: z.string().min(1),
+  label: z.string().min(1),
+  type: z.enum(['text', 'email', 'number', 'boolean', 'date', 'select', 'textarea']),
+  required: z.boolean().default(false),
+  options: z.array(z.string()).optional(), // for select fields
+  placeholder: z.string().optional(),
+  defaultValue: z.any().optional(),
+})
+
+export const CollectionSchema = z.object({
+  name: z.string().min(1),
+  label: z.string().min(1),
+  fields: z.array(FieldSchema).min(1),
+})
+
+export const AppConfigSchema = z.object({
+  name: z.string().min(1),
+  description: z.string().optional(),
+  collections: z.array(CollectionSchema).min(1),
+})
+
+export type FieldConfig = z.infer<typeof FieldSchema>
+export type CollectionConfig = z.infer<typeof CollectionSchema>
+export type AppConfig = z.infer<typeof AppConfigSchema>
+
+export function parseConfig(raw: unknown): {
+  config: AppConfig | null
+  errors: string[]
+} {
+  const result = AppConfigSchema.safeParse(raw)
+  if (result.success) return { config: result.data, errors: [] }
+
+  const errors = result.error.issues.map(
+    (e) => `${e.path.join('.')}: ${e.message}`
+  )
+  return { config: null, errors }
+}
+
+export function validateRecord(
+  data: Record<string, unknown>,
+  collection: CollectionConfig
+): { valid: boolean; errors: string[] } {
+  const errors: string[] = []
+
+  for (const field of collection.fields) {
+    const value = data[field.name]
+
+    if (field.required && (value === undefined || value === null || value === '')) {
+      errors.push(`${field.label} is required`)
+      continue
+    }
+
+    if (value === undefined || value === null || value === '') continue
+
+    switch (field.type) {
+      case 'email':
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value)))
+          errors.push(`${field.label} must be a valid email`)
+        break
+      case 'number':
+        if (isNaN(Number(value)))
+          errors.push(`${field.label} must be a number`)
+        break
+      case 'select':
+        if (field.options && !field.options.includes(String(value)))
+          errors.push(`${field.label} must be one of: ${field.options.join(', ')}`)
+        break
+    }
+  }
+
+  return { valid: errors.length === 0, errors }
+}
