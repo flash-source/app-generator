@@ -126,12 +126,19 @@ export function AppRuntime({ appId, config, collections }: Props) {
               </p>
             </div>
             {!showForm && (
-              <button
-                onClick={() => setShowForm(true)}
-                className="bg-violet-600 hover:bg-violet-500 px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
-              >
-                <span>+</span> Add record
-              </button>
+              <div className="flex items-center gap-2">
+                <CSVImport
+                  appId={appId}
+                  collection={activeCollection}
+                  onImport={() => fetchRecords(activeCollection)}
+                />
+                <button
+                  onClick={() => setShowForm(true)}
+                  className="bg-violet-600 hover:bg-violet-500 px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+                >
+                  <span>+</span> Add record
+                </button>
+              </div>
             )}
           </div>
 
@@ -255,5 +262,53 @@ function CellValue({ value, field }: { value: unknown; field: any }) {
     <span className="truncate block max-w-[180px]" title={str}>
       {str}
     </span>
+  )
+}
+
+function CSVImport({ appId, collection, onImport }: {
+  appId: string
+  collection: CollectionConfig
+  onImport: () => void
+}) {
+  const [loading, setLoading] = useState(false)
+  const [result, setResult] = useState<{ imported: number; skipped: number } | null>(null)
+
+  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setLoading(true)
+    setResult(null)
+    const fd = new FormData()
+    fd.append('file', file)
+    const res = await fetch(`/api/apps/${appId}/${collection.name}/import`, {
+      method: 'POST',
+      body: fd,
+    })
+    const data = await res.json()
+    setResult(data)
+    setLoading(false)
+    if (data.imported > 0) onImport()
+    e.target.value = ''
+  }
+
+  return (
+    <div className="relative">
+      <label className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm border border-zinc-700 cursor-pointer transition-colors ${
+        loading ? 'opacity-50 cursor-not-allowed' : 'hover:border-zinc-500 text-zinc-400 hover:text-white'
+      }`}>
+        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+        </svg>
+        {loading ? 'Importing...' : 'Import CSV'}
+        <input type="file" accept=".csv" onChange={handleFile} className="hidden" disabled={loading} />
+      </label>
+      {result && (
+        <div className="absolute right-0 top-10 z-10 bg-zinc-800 border border-zinc-700 rounded-lg p-3 text-xs whitespace-nowrap shadow-xl">
+          <p className="text-emerald-400">✓ {result.imported} imported</p>
+          {result.skipped > 0 && <p className="text-amber-400">⚠ {result.skipped} skipped</p>}
+          <button onClick={() => setResult(null)} className="text-zinc-500 mt-1">dismiss</button>
+        </div>
+      )}
+    </div>
   )
 }
