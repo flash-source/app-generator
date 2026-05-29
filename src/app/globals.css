@@ -1,37 +1,82 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --bg: #FAF9F6;
+    --surface: #FFFFFF;
+    --surface-2: #F2EFE9;
+    --border: #E8E3DC;
+    --border-strong: #D4CEC6;
+    --text: #1C1917;
+    --text-muted: #78716C;
+    --text-subtle: #A8A29E;
+    --accent: #0EA5E9;
+    --accent-hover: #0284C7;
+    --accent-light: #E0F2FE;
+    --accent-dark: #0369A1;
+    --danger: #EF4444;
+    --danger-light: #FEF2F2;
+    --success: #10B981;
+    --success-light: #ECFDF5;
+    --warning: #F59E0B;
   }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection {
+    background: var(--accent-light);
+    color: var(--accent-dark);
+  }
+
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-}
-
-::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,0.2);
+@layer utilities {
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, #38BDF8, #0284C7);
+    color: white;
+    font-weight: 500;
+    border-radius: 8px;
+    transition: all 0.15s;
+    box-shadow: 0 1px 3px rgba(14,165,233,0.3);
+  }
+  .btn-primary:hover {
+    background: linear-gradient(135deg, #0EA5E9, #0369A1);
+    box-shadow: 0 4px 12px rgba(14,165,233,0.35);
+    transform: translateY(-0.5px);
+  }
+  .btn-primary:disabled {
+    opacity: 0.5;
+    transform: none;
+    box-shadow: none;
+  }
+  .input-base {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 14px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    width: 100%;
+  }
+  .input-base:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(14,165,233,0.12);
+  }
+  .input-base::placeholder { color: var(--text-subtle); }
 }
