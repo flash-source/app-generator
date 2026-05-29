@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import { Providers } from './providers'
@@ -9,12 +9,15 @@ export const metadata: Metadata = {
   title: 'AppForge — AI App Generator',
   description: 'Generate apps from JSON config',
   manifest: '/manifest.json',
-  themeColor: '#7c3aed',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
     title: 'AppForge',
   },
+}
+
+export const viewport: Viewport = {
+  themeColor: '#7c3aed',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
