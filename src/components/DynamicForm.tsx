@@ -28,106 +28,93 @@ export function DynamicForm({ collection, onSubmit, onCancel }: Props) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-
     const newErrors: Record<string, string> = {}
     for (const field of collection.fields) {
       const v = values[field.name]
-      if (field.required && (v === '' || v === null || v === undefined)) {
+      if (field.required && (v === '' || v === null || v === undefined))
         newErrors[field.name] = `${field.label} is required`
-      }
     }
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors)
-      return
-    }
-
+    if (Object.keys(newErrors).length > 0) { setErrors(newErrors); return }
     setLoading(true)
-    try {
-      await onSubmit(values)
-    } finally {
-      setLoading(false)
-    }
+    try { await onSubmit(values) } finally { setLoading(false) }
   }
+
+  const inputClass = 'input-base'
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      {collection.fields.map(field => (
-        <div key={field.name}>
-          <label className="block text-xs font-medium text-zinc-400 mb-1.5">
-            {field.label}
-            {field.required && <span className="text-red-400 ml-1">*</span>}
-          </label>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {collection.fields.map(field => (
+          <div key={field.name} className={field.type === 'textarea' ? 'sm:col-span-2' : ''}>
+            <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--text-muted)' }}>
+              {field.label}
+              {field.required && <span className="ml-1" style={{ color: 'var(--danger)' }}>*</span>}
+            </label>
 
-          {field.type === 'textarea' && (
-            <textarea
-              value={values[field.name] as string}
-              onChange={e => setValue(field.name, e.target.value)}
-              placeholder={field.placeholder ?? ''}
-              rows={3}
-              className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm outline-none focus:border-violet-500 transition-colors resize-none"
-            />
-          )}
+            {field.type === 'textarea' && (
+              <textarea
+                value={values[field.name] as string}
+                onChange={e => setValue(field.name, e.target.value)}
+                placeholder={field.placeholder ?? ''}
+                rows={3}
+                className={inputClass}
+                style={{ resize: 'none' }}
+              />
+            )}
 
-          {field.type === 'select' && (
-            <select
-              value={values[field.name] as string}
-              onChange={e => setValue(field.name, e.target.value)}
-              className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm outline-none focus:border-violet-500 transition-colors"
-            >
-              <option value="">Select...</option>
-              {field.options?.map(opt => (
-                <option key={opt} value={opt}>{opt}</option>
-              ))}
-            </select>
-          )}
+            {field.type === 'select' && (
+              <select
+                value={values[field.name] as string}
+                onChange={e => setValue(field.name, e.target.value)}
+                className={inputClass}
+              >
+                <option value="">Select...</option>
+                {field.options?.map(opt => (
+                  <option key={opt} value={opt}>{opt}</option>
+                ))}
+              </select>
+            )}
 
-          {field.type === 'boolean' && (
-            <label className="flex items-center gap-2 cursor-pointer">
+            {field.type === 'boolean' && (
               <div
                 onClick={() => setValue(field.name, !values[field.name])}
-                className={`w-10 h-5 rounded-full transition-colors relative cursor-pointer ${
-                  values[field.name] ? 'bg-violet-600' : 'bg-zinc-700'
-                }`}
+                className="flex items-center gap-3 cursor-pointer p-2"
               >
-                <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-transform ${
-                  values[field.name] ? 'translate-x-5' : 'translate-x-0.5'
-                }`} />
+                <div className="w-10 h-5.5 rounded-full relative transition-colors"
+                  style={{ background: values[field.name] ? 'var(--accent)' : 'var(--border-strong)', height: '22px' }}>
+                  <div className="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform"
+                    style={{ transform: values[field.name] ? 'translateX(22px)' : 'translateX(2px)' }} />
+                </div>
+                <span className="text-sm" style={{ color: 'var(--text)' }}>
+                  {values[field.name] ? 'Yes' : 'No'}
+                </span>
               </div>
-              <span className="text-sm text-zinc-300">
-                {values[field.name] ? 'Yes' : 'No'}
-              </span>
-            </label>
-          )}
+            )}
 
-          {['text', 'email', 'number', 'date'].includes(field.type) && (
-            <input
-              type={field.type}
-              value={values[field.name] as string}
-              onChange={e => setValue(field.name, e.target.value)}
-              placeholder={field.placeholder ?? ''}
-              className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm outline-none focus:border-violet-500 transition-colors"
-            />
-          )}
+            {['text', 'email', 'number', 'date'].includes(field.type) && (
+              <input
+                type={field.type}
+                value={values[field.name] as string}
+                onChange={e => setValue(field.name, e.target.value)}
+                placeholder={field.placeholder ?? ''}
+                className={inputClass}
+              />
+            )}
 
-          {errors[field.name] && (
-            <p className="text-red-400 text-xs mt-1">{errors[field.name]}</p>
-          )}
-        </div>
-      ))}
+            {errors[field.name] && (
+              <p className="text-xs mt-1" style={{ color: 'var(--danger)' }}>{errors[field.name]}</p>
+            )}
+          </div>
+        ))}
+      </div>
 
       <div className="flex gap-3 pt-2">
-        <button
-          type="submit"
-          disabled={loading}
-          className="bg-violet-600 hover:bg-violet-500 disabled:opacity-50 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-        >
+        <button type="submit" disabled={loading} className="btn-primary px-5 py-2 text-sm">
           {loading ? 'Saving...' : 'Save record'}
         </button>
-        <button
-          type="button"
-          onClick={onCancel}
-          className="text-zinc-400 hover:text-white text-sm transition-colors px-4 py-2"
-        >
+        <button type="button" onClick={onCancel}
+          className="px-4 py-2 text-sm rounded-lg border transition-colors"
+          style={{ border: '1.5px solid var(--border)', color: 'var(--text-muted)' }}>
           Cancel
         </button>
       </div>

@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
   if (!resetToken || resetToken.used || resetToken.expiresAt < new Date())
     return NextResponse.json({ error: 'Invalid or expired reset link' }, { status: 400 })
 
-  const hashed = await bcrypt.hash(body.password, 12)
+  const hashed = await bcrypt.hash(body.password, 10)
 
   await prisma.user.update({
     where: { email: resetToken.email },

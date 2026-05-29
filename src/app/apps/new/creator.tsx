@@ -32,8 +32,7 @@ export function AppCreator() {
   }
 
   function applyTemplate(idx: number) {
-    const t = TEMPLATES[idx]
-    const str = JSON.stringify(t.config, null, 2)
+    const str = JSON.stringify(TEMPLATES[idx].config, null, 2)
     setActiveTemplate(idx)
     setJson(str)
     validate(str)
@@ -67,114 +66,115 @@ export function AppCreator() {
   try { preview = JSON.parse(json) } catch {}
 
   return (
-    <div className="min-h-screen">
-      <nav className="border-b border-zinc-800 px-6 py-4 flex items-center gap-4">
-        <button
-          onClick={() => router.push('/dashboard')}
-          className="text-zinc-400 hover:text-white text-sm transition-colors"
-        >
+    <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
+      <nav className="sticky top-0 z-10 px-6 py-3.5 flex items-center gap-3 border-b"
+        style={{ background: 'rgba(250,249,246,0.85)', backdropFilter: 'blur(12px)', borderColor: 'var(--border)' }}>
+        <button onClick={() => router.push('/dashboard')}
+          className="text-sm transition-colors flex items-center gap-1.5"
+          style={{ color: 'var(--text-muted)' }}>
           ← Dashboard
         </button>
-        <span className="text-zinc-600">/</span>
-        <span className="text-sm font-medium">New App</span>
+        <span style={{ color: 'var(--border-strong)' }}>/</span>
+        <span className="text-sm font-medium" style={{ color: 'var(--text)' }}>New App</span>
       </nav>
 
       <div className="max-w-6xl mx-auto px-6 py-10">
         <div className="mb-8">
-          <h1 className="text-2xl font-semibold tracking-tight">Create App</h1>
-          <p className="text-zinc-400 text-sm mt-1">
-            Define your app structure in JSON. AppForge generates the UI and APIs automatically.
+          <h1 className="text-2xl font-semibold" style={{ color: 'var(--text)' }}>Create App</h1>
+          <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
+            Define your app structure in JSON. AppForge generates everything else.
           </p>
         </div>
 
-        <div className="flex gap-2 mb-6">
+        {/* Templates */}
+        <div className="flex gap-2 mb-6 flex-wrap">
+          <span className="text-xs self-center mr-1" style={{ color: 'var(--text-subtle)' }}>Start with:</span>
           {TEMPLATES.map((t, i) => (
-            <button
-              key={i}
-              onClick={() => applyTemplate(i)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
-                activeTemplate === i
-                  ? 'bg-violet-600 border-violet-500 text-white'
-                  : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-zinc-500'
-              }`}
-            >
+            <button key={i} onClick={() => applyTemplate(i)}
+              className="px-3 py-1.5 rounded-lg text-xs font-medium border transition-all"
+              style={activeTemplate === i
+                ? { background: 'var(--accent-light)', borderColor: 'var(--accent)', color: 'var(--accent-dark)' }
+                : { background: 'var(--surface)', borderColor: 'var(--border)', color: 'var(--text-muted)' }
+              }>
               {t.name}
             </button>
           ))}
-          <span className="text-zinc-600 text-xs self-center ml-2">← start with a template</span>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Editor */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="text-xs font-medium text-zinc-400 uppercase tracking-wider">
+              <label className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>
                 Config JSON
               </label>
-              <div className="flex items-center gap-2">
-                {isValid ? (
-                  <span className="text-emerald-400 text-xs flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" />
-                    Valid
-                  </span>
-                ) : (
-                  <span className="text-red-400 text-xs flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-red-400 inline-block" />
-                    {errors.length} error{errors.length > 1 ? 's' : ''}
-                  </span>
-                )}
+              <div className="flex items-center gap-1.5 text-xs">
+                <span className="w-1.5 h-1.5 rounded-full inline-block"
+                  style={{ background: isValid ? 'var(--success)' : 'var(--danger)' }} />
+                <span style={{ color: isValid ? 'var(--success)' : 'var(--danger)' }}>
+                  {isValid ? 'Valid config' : `${errors.length} error${errors.length > 1 ? 's' : ''}`}
+                </span>
               </div>
             </div>
             <textarea
               value={json}
               onChange={e => handleChange(e.target.value)}
               spellCheck={false}
-              className="w-full h-[480px] bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-4 text-sm font-mono outline-none focus:border-violet-500 transition-colors resize-none text-zinc-100 leading-relaxed"
+              className="w-full h-[480px] rounded-xl px-4 py-4 text-sm font-mono outline-none resize-none leading-relaxed border"
+              style={{
+                background: '#1C1917',
+                color: '#E7E5E4',
+                borderColor: isValid ? 'var(--border)' : '#FCA5A5',
+                caretColor: 'var(--accent)',
+              }}
             />
             {errors.length > 0 && (
-              <div className="mt-2 space-y-1">
+              <div className="mt-2 p-3 rounded-lg border" style={{ background: 'var(--danger-light)', borderColor: '#FCA5A5' }}>
                 {errors.map((e, i) => (
-                  <p key={i} className="text-red-400 text-xs font-mono">⚠ {e}</p>
+                  <p key={i} className="text-xs font-mono" style={{ color: 'var(--danger)' }}>⚠ {e}</p>
                 ))}
               </div>
             )}
           </div>
 
+          {/* Preview */}
           <div>
-            <div className="flex items-center mb-2">
-              <label className="text-xs font-medium text-zinc-400 uppercase tracking-wider">
-                Preview
-              </label>
-            </div>
-            <div className="h-[480px] bg-zinc-900 border border-zinc-700 rounded-xl p-5 overflow-y-auto">
+            <label className="block text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--text-muted)' }}>
+              Preview
+            </label>
+            <div className="card h-[480px] p-5 overflow-y-auto">
               {!preview ? (
-                <p className="text-zinc-500 text-sm">Fix JSON syntax to see preview</p>
+                <p className="text-sm" style={{ color: 'var(--text-subtle)' }}>Fix JSON to see preview</p>
               ) : (
-                <div className="space-y-5">
+                <div className="space-y-4">
                   <div>
-                    <h2 className="font-semibold text-lg">{preview.name || 'Untitled App'}</h2>
+                    <h2 className="font-semibold text-lg" style={{ color: 'var(--text)' }}>
+                      {preview.name || 'Untitled App'}
+                    </h2>
                     {preview.description && (
-                      <p className="text-zinc-400 text-sm mt-1">{preview.description}</p>
+                      <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>{preview.description}</p>
                     )}
                   </div>
                   {Array.isArray(preview.collections) && preview.collections.map((col: any, i: number) => (
-                    <div key={i} className="bg-zinc-800 rounded-lg p-4">
+                    <div key={i} className="rounded-xl p-4 border" style={{ background: 'var(--surface-2)', borderColor: 'var(--border)' }}>
                       <div className="flex items-center gap-2 mb-3">
-                        <div className="w-2 h-2 rounded-full bg-violet-400" />
-                        <h3 className="font-medium text-sm">{col.label || col.name}</h3>
-                        <span className="text-zinc-500 text-xs ml-auto">
+                        <div className="w-2 h-2 rounded-full" style={{ background: 'var(--accent)' }} />
+                        <h3 className="font-semibold text-sm" style={{ color: 'var(--text)' }}>
+                          {col.label || col.name}
+                        </h3>
+                        <span className="text-xs ml-auto" style={{ color: 'var(--text-subtle)' }}>
                           {Array.isArray(col.fields) ? col.fields.length : 0} fields
                         </span>
                       </div>
                       <div className="space-y-1.5">
                         {Array.isArray(col.fields) && col.fields.map((f: any, j: number) => (
                           <div key={j} className="flex items-center gap-2 text-xs">
-                            <span className={`px-1.5 py-0.5 rounded font-mono ${typeColor(f.type)}`}>
+                            <span className="px-1.5 py-0.5 rounded font-mono font-medium"
+                              style={{ background: typeColor(f.type).bg, color: typeColor(f.type).text }}>
                               {f.type || '?'}
                             </span>
-                            <span className="text-zinc-300">{f.label || f.name}</span>
-                            {f.required && (
-                              <span className="text-red-400 ml-auto">required</span>
-                            )}
+                            <span style={{ color: 'var(--text)' }}>{f.label || f.name}</span>
+                            {f.required && <span className="ml-auto text-xs" style={{ color: 'var(--danger)' }}>required</span>}
                           </div>
                         ))}
                       </div>
@@ -187,18 +187,12 @@ export function AppCreator() {
         </div>
 
         <div className="flex items-center justify-between mt-6">
-          <button
-            onClick={() => router.push('/dashboard')}
-            className="text-zinc-400 hover:text-white text-sm transition-colors"
-          >
+          <button onClick={() => router.push('/dashboard')}
+            className="text-sm transition-colors" style={{ color: 'var(--text-muted)' }}>
             Cancel
           </button>
-          <button
-            onClick={handleCreate}
-            disabled={!isValid || loading}
-            className="bg-violet-600 hover:bg-violet-500 disabled:opacity-40 disabled:cursor-not-allowed px-6 py-2.5 rounded-lg text-sm font-medium transition-colors"
-          >
-            {loading ? 'Creating...' : 'Create App →'}
+          <button onClick={handleCreate} disabled={!isValid || loading} className="btn-primary px-6 py-2.5 text-sm">
+            {loading ? 'Creating app...' : 'Create App →'}
           </button>
         </div>
       </div>
@@ -207,14 +201,14 @@ export function AppCreator() {
 }
 
 function typeColor(type: string) {
-  const map: Record<string, string> = {
-    text: 'bg-blue-500/20 text-blue-300',
-    email: 'bg-cyan-500/20 text-cyan-300',
-    number: 'bg-amber-500/20 text-amber-300',
-    boolean: 'bg-emerald-500/20 text-emerald-300',
-    date: 'bg-purple-500/20 text-purple-300',
-    select: 'bg-pink-500/20 text-pink-300',
-    textarea: 'bg-zinc-500/20 text-zinc-300',
+  const map: Record<string, { bg: string; text: string }> = {
+    text: { bg: '#DBEAFE', text: '#1D4ED8' },
+    email: { bg: '#CFFAFE', text: '#0E7490' },
+    number: { bg: '#FEF3C7', text: '#B45309' },
+    boolean: { bg: '#D1FAE5', text: '#065F46' },
+    date: { bg: '#EDE9FE', text: '#5B21B6' },
+    select: { bg: '#FCE7F3', text: '#9D174D' },
+    textarea: { bg: '#F1F5F9', text: '#475569' },
   }
-  return map[type] ?? 'bg-zinc-700 text-zinc-400'
+  return map[type] ?? { bg: '#F1F5F9', text: '#475569' }
 }
