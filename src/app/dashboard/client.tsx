@@ -31,7 +31,7 @@ export function DashboardClient({ apps: initial, user }: {
     <div className="min-h-screen">
       <nav className="border-b border-zinc-800 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 bg-violet-500 rounded-md flex items-center justify-center text-xs font-bold">A</div>
+          <img src="/icon-192.png" alt="AppForge" className="w-7 h-7 rounded-md object-cover" />
           <span className="font-semibold tracking-tight">AppForge</span>
         </div>
         <div className="flex items-center gap-4">

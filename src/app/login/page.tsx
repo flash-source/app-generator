@@ -49,7 +49,7 @@ export default function LoginPage() {
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
           <div className="inline-flex items-center gap-2 mb-2">
-            <div className="w-8 h-8 bg-violet-500 rounded-lg flex items-center justify-center text-sm font-bold">A</div>
+            <img src="/icon-192.png" alt="AppForge" className="w-8 h-8 rounded-lg object-cover" />
             <span className="text-xl font-semibold tracking-tight">AppForge</span>
           </div>
           <p className="text-zinc-400 text-sm">
