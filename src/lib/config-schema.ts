@@ -10,10 +10,29 @@ export const FieldSchema = z.object({
   defaultValue: z.any().optional(),
 })
 
+export const WorkflowActionSchema = z.object({
+  type: z.enum(['set_field', 'notify']),
+  field: z.string().optional(),
+  value: z.string().optional(),
+  message: z.string().optional(),
+})
+
+export const WorkflowSchema = z.object({
+  name: z.string(),
+  trigger: z.enum(['on_create', 'on_update']),
+  conditions: z.array(z.object({
+    field: z.string(),
+    operator: z.enum(['equals', 'not_equals', 'contains', 'greater_than', 'less_than']),
+    value: z.string(),
+  })).default([]),
+  actions: z.array(WorkflowActionSchema).min(1),
+})
+
 export const CollectionSchema = z.object({
   name: z.string().min(1),
   label: z.string().min(1),
   fields: z.array(FieldSchema).min(1),
+  workflows: z.array(WorkflowSchema).optional().default([]),
 })
 
 export const AppConfigSchema = z.object({
@@ -73,3 +92,5 @@ export function validateRecord(
 
   return { valid: errors.length === 0, errors }
 }
+
+export type WorkflowConfig = z.infer<typeof WorkflowSchema>

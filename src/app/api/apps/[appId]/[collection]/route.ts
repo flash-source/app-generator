@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { AppConfig, validateRecord } from '@/lib/config-schema'
+import { runWorkflows } from '@/lib/workflow-engine'
 
 async function getAppAndCollection(
   appId: string,
@@ -74,10 +75,17 @@ export async function POST(
   const { valid, errors } = validateRecord(body, result.collectionConfig)
   if (!valid) return NextResponse.json({ error: 'Validation failed', details: errors }, { status: 422 })
 
+  const { data: processedData, notifications } = runWorkflows(
+    body,
+    result.collectionConfig,
+    'on_create'
+  )
+
   const record = await prisma.record.create({
-    data: { collectionId: result.collection.id, data: body },
+    data: { collectionId: result.collection.id, data: processedData as any },
   })
-  return NextResponse.json(record, { status: 201 })
+
+  return NextResponse.json({ ...record, notifications }, { status: 201 })
 }
 
 export async function DELETE(

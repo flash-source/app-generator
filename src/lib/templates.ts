@@ -47,6 +47,18 @@ export const TEMPLATES = [
             { name: 'status', label: 'Status', type: 'select', required: true, options: ['todo', 'in-progress', 'done'] },
             { name: 'dueDate', label: 'Due Date', type: 'date', required: false },
           ],
+          workflows: [
+            {
+              name: 'Flag high priority',
+              trigger: 'on_create',
+              conditions: [
+                { field: 'priority', operator: 'equals', value: 'high' }
+              ],
+              actions: [
+                { type: 'notify', message: 'High priority task created: {{title}}' }
+              ]
+            }
+          ]
         },
       ],
     },

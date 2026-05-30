@@ -13,6 +13,9 @@ export function AppCreator() {
   const [isValid, setIsValid] = useState(true)
   const [loading, setLoading] = useState(false)
   const [activeTemplate, setActiveTemplate] = useState(0)
+  const [aiPrompt, setAiPrompt] = useState('')
+  const [aiLoading, setAiLoading] = useState(false)
+  const [aiError, setAiError] = useState('')
 
   const validate = useCallback((value: string) => {
     try {
@@ -36,6 +39,29 @@ export function AppCreator() {
     setActiveTemplate(idx)
     setJson(str)
     validate(str)
+  }
+
+  async function handleGenerate() {
+    if (!aiPrompt.trim()) return
+    setAiLoading(true)
+    setAiError('')
+    try {
+      const res = await fetch('/api/ai/generate-config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: aiPrompt }),
+      })
+      const data = await res.json()
+      if (!res.ok) { setAiError(data.error); return }
+      const str = JSON.stringify(data.config, null, 2)
+      setJson(str)
+      validate(str)
+      setActiveTemplate(-1)
+    } catch {
+      setAiError('Something went wrong')
+    } finally {
+      setAiLoading(false)
+    }
   }
 
   async function handleCreate() {
@@ -83,6 +109,46 @@ export function AppCreator() {
           <h1 className="text-2xl font-semibold" style={{ color: 'var(--text)' }}>Create App</h1>
           <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
             Define your app structure in JSON. AppForge generates everything else.
+          </p>
+        </div>
+
+        {/* AI Generator */}
+        <div className="card p-4 mb-6" style={{ background: 'linear-gradient(135deg, #F0F9FF, #E0F2FE)', borderColor: '#BAE6FD' }}>
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-base">✨</span>
+            <span className="text-sm font-semibold" style={{ color: '#0369A1' }}>Generate from prompt</span>
+            <span className="text-xs px-2 py-0.5 rounded-full font-medium ml-1"
+              style={{ background: '#DBEAFE', color: '#1D4ED8' }}>AI</span>
+          </div>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={aiPrompt}
+              onChange={e => setAiPrompt(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleGenerate()}
+              placeholder='e.g. "A CRM to track leads, contacts and deals"'
+              className="input-base flex-1 text-sm"
+              disabled={aiLoading}
+            />
+            <button
+              onClick={handleGenerate}
+              disabled={aiLoading || !aiPrompt.trim()}
+              className="btn-primary px-4 py-2 text-sm shrink-0 flex items-center gap-2"
+            >
+              {aiLoading ? (
+                <>
+                  <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="white" strokeWidth="4"/>
+                    <path className="opacity-75" fill="white" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                  </svg>
+                  Generating...
+                </>
+              ) : 'Generate →'}
+            </button>
+          </div>
+          {aiError && <p className="text-xs mt-2" style={{ color: 'var(--danger)' }}>{aiError}</p>}
+          <p className="text-xs mt-2" style={{ color: '#0284C7' }}>
+            Describe your app in plain English — AI generates the JSON config automatically
           </p>
         </div>
 
