@@ -52,7 +52,13 @@ export function AppCreator() {
         body: JSON.stringify({ prompt: aiPrompt }),
       })
       const data = await res.json()
+
+      if (data.error === 'no_match') {
+        setAiError(`No match found. Try: ${data.suggestions?.slice(0, 3).join(', ')}`)
+        return
+      }
       if (!res.ok) { setAiError(data.error); return }
+
       const str = JSON.stringify(data.config, null, 2)
       setJson(str)
       validate(str)
