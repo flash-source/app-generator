@@ -43,14 +43,13 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex" style={{ background: 'var(--bg)' }}>
-      {/* Left panel — branding */}
       <div
         className="hidden lg:flex flex-col justify-between w-[420px] shrink-0 p-10"
         style={{ background: 'linear-gradient(160deg, #0EA5E9 0%, #6366F1 100%)' }}
       >
         <div className="flex items-center gap-2.5">
           <img src="/icon-192.png" alt="AppForge" className="w-8 h-8 rounded-lg" />
-          <span className="text-white font-semibold text-lg tracking-tight">AppForge</span>
+          <span className="text-blue-700 lg:text-white font-semibold text-2xl tracking-tight">AppForge</span>
         </div>
         <div>
           <blockquote className="text-white/90 text-2xl font-light leading-relaxed mb-6">
@@ -68,22 +67,20 @@ export default function LoginPage() {
         <p className="text-white/40 text-xs">AppForge © 2026</p>
       </div>
 
-      {/* Right panel — form */}
       <div className="flex-1 flex items-center justify-center px-6 py-12">
         <div className="w-full max-w-sm">
           <div className="lg:hidden flex items-center justify-center gap-2 mb-8">
             <img src="/icon-192.png" alt="AppForge" className="w-8 h-8 rounded-lg" />
-            <span className="font-semibold text-lg">AppForge</span>
+            <span className="font-semibold text-3xl text-sky-600">AppForge</span>
           </div>
 
-          <h1 className="text-2xl font-semibold mb-1" style={{ color: 'var(--text)' }}>
+          <h1 className="text-2xl font-semibold mb-1 text-center" style={{ color: 'var(--text)' }}>
             {isRegister ? 'Create account' : 'Welcome back'}
           </h1>
-          <p className="text-sm mb-7" style={{ color: 'var(--text-muted)' }}>
+          <p className="text-sm mb-7 text-center" style={{ color: 'var(--text-muted)' }}>
             {isRegister ? 'Start building in seconds' : 'Sign in to your workspace'}
           </p>
 
-          {/* OAuth */}
           <div className="flex flex-col gap-2 mb-5">
             <button
               onClick={() => { setOauthLoading('github'); signIn('github', { callbackUrl: '/dashboard' }) }}
